@@ -12,11 +12,22 @@ import {
   PressureCard,
   NightSkyCard,
 } from '../components/widgets/InfoWidgets';
+import {
+  AqiCard,
+  FriendComparison,
+  WeeklyTrend,
+  WeekPattern,
+} from '../components/widgets/AdditionalWidgets';
+import { OfflineBanner, StaleDataIndicator, ToastLayer } from '../components/states';
 import { Skeleton } from '../components/ui';
+import { useWeather } from '../hooks';
 
 export function HomeScreen() {
   const { weatherData, decision, isLoading, fetchAndEvaluate, getActiveProfile } = useStore();
   const profile = getActiveProfile();
+
+  // refetch خودکار هر ۳۰ دقیقه
+  useWeather();
 
   useEffect(() => {
     fetchAndEvaluate();
@@ -41,6 +52,12 @@ export function HomeScreen() {
 
   return (
     <div className="space-y-0 animate-fade-in">
+      {/* بنر آفلاین */}
+      <OfflineBanner />
+
+      {/* نشانگر داده قدیمی */}
+      <StaleDataIndicator />
+
       {/* ۶.۱ بخش "الان" */}
       <NowSection />
 
@@ -67,9 +84,16 @@ export function HomeScreen() {
 
       {/* ویجت‌های اضافی */}
       <DaylightCard />
+      <AqiCard />
+      <FriendComparison />
       <CarWashCard />
       <PressureCard />
       <NightSkyCard />
+      <WeeklyTrend />
+      <WeekPattern />
+
+      {/* Toast Layer */}
+      <ToastLayer />
     </div>
   );
 }
