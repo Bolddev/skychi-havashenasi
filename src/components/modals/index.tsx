@@ -3,6 +3,9 @@ import { useStore } from '../../store';
 import { Modal, GlassCard, Badge, WeatherIcon, ProgressBar } from '../ui';
 import type { HourRisk, ActivityScore } from '../../types';
 
+// Re-export useStore for use in modals
+const { useStore: useStoreHook } = { useStore };
+
 // ============================================================
 // ۷.۱ HourDetailModal
 // ============================================================
@@ -251,6 +254,72 @@ export function WhyModal({ title, reasons, onClose }: { title: string; reasons: 
 }
 
 // ============================================================
+// ۷.۴ NotificationModal
+// ============================================================
+export function NotificationModal({ onClose }: { onClose: () => void }) {
+  const { profiles, activeProfileId, updateProfile } = useStore();
+  const profile = profiles.find((p) => p.id === activeProfileId) || profiles[0];
+
+  const handleToggle = (enabled: boolean) => {
+    updateProfile(profile.id, {
+      notifications: { ...profile.notifications, enabled },
+    });
+  };
+
+  const handleLeadTime = (time: number) => {
+    updateProfile(profile.id, {
+      notifications: { ...profile.notifications, leadTime: time },
+    });
+  };
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title="تنظیمات اعلان‌ها">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium">اعلان‌ها</span>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={profile.notifications.enabled}
+              onChange={(e) => handleToggle(e.target.checked)}
+              className="w-5 h-5 rounded accent-accent"
+            />
+            <span className="text-sm">{profile.notifications.enabled ? 'فعال' : 'غیرفعال'}</span>
+          </label>
+        </div>
+
+        {profile.notifications.enabled && (
+          <>
+            <div>
+              <label className="text-sm font-medium mb-2 block">زمان پیش از خروج:</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 30, label: '۳۰ دقیقه' },
+                  { value: 60, label: '۱ ساعت' },
+                  { value: 120, label: '۲ ساعت' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleLeadTime(option.value)}
+                    className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                      profile.notifications.leadTime === option.value
+                        ? 'bg-accent text-white'
+                        : 'glass-card hover:bg-white/80'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+// ============================================================
 // ۷.۵ AboutModal
 // ============================================================
 export function AboutModal({ onClose }: { onClose: () => void }) {
@@ -283,6 +352,35 @@ export function AboutModal({ onClose }: { onClose: () => void }) {
 
         <div className="text-center text-xs text-text-tertiary">
           ساخته شده با ❤️ برای ساکنان قرچک
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ============================================================
+// مودال تأیید بازنشانی
+// ============================================================
+export function ResetConfirmModal({ onConfirm, onClose }: { onConfirm: () => void; onClose: () => void }) {
+  return (
+    <Modal isOpen={true} onClose={onClose} title="بازنشانی تنظیمات">
+      <div className="space-y-4">
+        <p className="text-sm text-text-secondary">
+          آیا مطمئن هستید که می‌خواهید تمام تنظیمات را بازنشانی کنید؟ این عمل قابل بازگشت نیست.
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={onClose}
+            className="flex-1 btn-secondary py-2 rounded-xl text-sm"
+          >
+            انصراف
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-2 bg-danger text-white rounded-xl text-sm font-medium"
+          >
+            بله، بازنشانی کن
+          </button>
         </div>
       </div>
     </Modal>

@@ -322,3 +322,70 @@ export function InfoButton({ onClick, label = 'چرا؟' }: InfoButtonProps) {
     </button>
   );
 }
+
+// ============================================================
+// Slider (برای آنبوردینگ)
+// ============================================================
+interface SliderProps {
+  min: number;
+  max: number;
+  value: number;
+  onChange: (value: number) => void;
+  minLabel?: string;
+  maxLabel?: string;
+}
+
+export function Slider({ min, max, value, onChange, minLabel, maxLabel }: SliderProps) {
+  return (
+    <div className="space-y-2">
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full h-2 bg-white/40 rounded-full appearance-none cursor-pointer accent-accent"
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+      />
+      <div className="flex justify-between text-xs text-text-secondary">
+        <span>{minLabel || min}</span>
+        <span className="font-medium text-accent tabular-nums">{value}</span>
+        <span>{maxLabel || max}</span>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Switch (برای تنظیمات)
+// ============================================================
+interface SwitchProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label?: string;
+}
+
+export function Switch({ checked, onChange, label }: SwitchProps) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer">
+      <div className="relative">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only"
+          aria-label={label}
+        />
+        <div className={`w-11 h-6 rounded-full transition-colors ${
+          checked ? 'bg-accent' : 'bg-white/40'
+        }`} />
+        <div className={`absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+          checked ? 'translate-x-5' : 'translate-x-0'
+        }`} />
+      </div>
+      {label && <span className="text-sm">{label}</span>}
+    </label>
+  );
+}

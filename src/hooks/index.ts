@@ -73,3 +73,67 @@ export function useWeather() {
 
   return { fetchAndEvaluate };
 }
+
+// ============================================================
+// useProfile
+// ============================================================
+export function useProfile() {
+  const { profiles, activeProfileId, setActiveProfile, updateProfile } = useStore();
+
+  const activeProfile = profiles.find((p) => p.id === activeProfileId) || profiles[0];
+
+  const switchProfile = (id: string) => {
+    setActiveProfile(id);
+  };
+
+  const editProfile = (id: string, updates: Partial<typeof activeProfile>) => {
+    updateProfile(id, updates);
+  };
+
+  return {
+    profiles,
+    activeProfile,
+    activeProfileId,
+    switchProfile,
+    editProfile,
+  };
+}
+
+// ============================================================
+// useNotifications (Notification API اختیاری)
+// ============================================================
+export function useNotifications() {
+  const [permission, setPermission] = useState<NotificationPermission>('default');
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestPermission = async () => {
+    if ('Notification' in window) {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      return result === 'granted';
+    }
+    return false;
+  };
+
+  const sendNotification = (title: string, body: string) => {
+    if ('Notification' in window && permission === 'granted') {
+      new Notification(title, {
+        body,
+        icon: '/icon-192.png',
+        badge: '/badge-72.png',
+      });
+    }
+  };
+
+  return {
+    permission,
+    requestPermission,
+    sendNotification,
+    isSupported: 'Notification' in window,
+  };
+}
