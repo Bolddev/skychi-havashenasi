@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import { fetchWeatherData, fetchAirQuality, getCurrentHourIndex, formatHour } from './weather';
 import { calculateDecision, calculateHourlyRisk, getDayName, getActivityEmoji } from './rules';
-import { Cloud, CloudRain, Sun, Wind, Thermometer, AlertTriangle, Droplets, Car, MapPin } from 'lucide-react';
+import { Cloud, CloudRain, Sun, Wind, Thermometer, AlertTriangle, Droplets, Car, MapPin, Share2 } from 'lucide-react';
+import { ExportModal } from './ExportModal';
 
 export function HomePage() {
   const { weatherData, setWeatherData, isLoading, setIsLoading, getActiveProfile, lastFetch } = useStore();
   const [airQuality, setAirQuality] = useState<{ pm2_5: number; pm10: number; us_aqi: number } | null>(null);
+  const [showExport, setShowExport] = useState(false);
   const profile = getActiveProfile();
 
   useEffect(() => {
@@ -63,15 +65,24 @@ export function HomePage() {
       {/* Header */}
       <div className="flex items-center justify-between px-1">
         <div>
-          <h1 className="text-2xl font-semibold text-text-primary">هویار</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">اسکایچی</h1>
           <div className="flex items-center gap-1 text-text-secondary text-sm">
             <MapPin size={14} />
             <span>قرچک، تهران</span>
           </div>
         </div>
-        <div className="glass-card px-3 py-2 text-center">
-          <div className="text-2xl font-semibold tabular-nums">{Math.round(currentActualTemp)}°</div>
-          <div className="text-xs text-text-secondary">احساسی {Math.round(currentTemp)}°</div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowExport(true)}
+            className="glass-card p-2.5 hover:bg-white/80 transition-all"
+            title="خروجی اطلاعات"
+          >
+            <Share2 size={18} className="text-accent" />
+          </button>
+          <div className="glass-card px-3 py-2 text-center">
+            <div className="text-2xl font-semibold tabular-nums">{Math.round(currentActualTemp)}°</div>
+            <div className="text-xs text-text-secondary">احساسی {Math.round(currentTemp)}°</div>
+          </div>
         </div>
       </div>
 
@@ -318,6 +329,9 @@ export function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* Export Modal */}
+      <ExportModal isOpen={showExport} onClose={() => setShowExport(false)} />
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function SettingsPage() {
   }
 
   const handleReset = () => {
-    localStorage.removeItem('hoyar-storage');
+    localStorage.removeItem('skychi-storage');
     window.location.reload();
   };
 
@@ -169,7 +169,7 @@ export function SettingsPage() {
 
       {/* About */}
       <div className="glass-card p-4 text-center">
-        <p className="text-lg font-semibold text-accent">هویار</p>
+        <p className="text-lg font-semibold text-accent">اسکایچی</p>
         <p className="text-xs text-text-secondary mt-1">دستیار تصمیم هوای بعدازظهر</p>
         <p className="text-xs text-text-secondary mt-2">داده‌ها: Open-Meteo API</p>
         <p className="text-xs text-text-secondary">نسخه ۱.۰ — وب</p>

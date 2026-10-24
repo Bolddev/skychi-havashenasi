@@ -159,7 +159,7 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: 'hoyar-storage',
+      name: 'skychi-storage',
       partialize: (state) => ({
         activeProfileId: state.activeProfileId,
         profiles: state.profiles,
