@@ -6,23 +6,46 @@ import type {
   WeatherData,
   UserProfile,
   DecisionOutput,
-  HourRisk,
-  TimeWindow,
   CurrentConditions,
-  GoDecision,
 } from '../types';
 import { calculateAllHourRisks } from './risk';
 import { findGoldenWindow, findAcceptableWindow } from './goldenWindow';
 import { calculateGoDecision } from './decision';
+import { generateWearAdvice, generateGearAdvice } from './wearGear';
+import { computeNowcast } from './nowcast';
+import { detectTemperatureShock } from './shock';
+import { calculateActivityScores } from './activities';
+import { calculateCarWash } from './carWash';
+import { calculateDaylightInfo } from './daylight';
+import { generateAlerts } from './alerts';
+import { calculateWeekRanking, calculateWeeklyTrend, calculateWeekPattern, buildWeekForecast } from './week';
+import { compareProfiles } from './compare';
+import { detectForecastChange } from './forecastChange';
+import { computeNightSky } from './nightSky';
+import { computePressure } from './pressure';
+import { calculateDepartureSuggestion, calculateDurationSuggestion } from './departure';
+import {
+  interpretTemperature,
+  interpretHumidity,
+  interpretCloudCover,
+  interpretWindGust,
+  interpretWindDirection,
+  interpretUV,
+  interpretAQI,
+  interpretWeatherCode,
+  buildSummary,
+} from './interpretations';
 
 export interface EvaluateInput {
   weather: WeatherData;
   profile: UserProfile;
+  allProfiles?: UserProfile[];
   now: Date;
+  forecastSnapshot?: import('../types').ForecastSnapshot | null;
 }
 
 export function evaluate(input: EvaluateInput): DecisionOutput {
-  const { weather, profile, now } = input;
+  const { weather, profile, allProfiles, now, forecastSnapshot } = input;
 
   // ۱. شرایط فعلی
   const current = buildCurrentConditions(weather, now);
@@ -56,7 +79,58 @@ export function evaluate(input: EvaluateInput): DecisionOutput {
         reasons: [],
       };
 
-  // ۶. محاسبه زمان آخرین به‌روزرسانی
+  // ۶. پوشش و تجهیزات
+  const wearAdvice = generateWearAdvice(goldenWindow, weather, profile);
+  const gearAdvice = generateGearAdvice(goldenWindow, weather, profile);
+
+  // ۷. Nowcast
+  const nowcast = computeNowcast(weather.minutely15, now);
+
+  // ۸. شوک دمایی
+  const temperatureShock = detectTemperatureShock(weather.hourly, weather.yesterday);
+
+  // ۹. امتیاز فعالیت‌ها
+  const activityScores = calculateActivityScores(weather, profile);
+
+  // ۱۰. کارواش
+  const carWash = calculateCarWash(weather, profile, now);
+
+  // ۱۱. اطلاعات خورشید
+  const daylightInfo = todayDaily ? calculateDaylightInfo(todayDaily, now) : null;
+
+  // ۱۲. هشدارها
+  const alerts = generateAlerts(weather, now);
+
+  // ۱۳. هفته
+  const weekRanking = calculateWeekRanking(weather, profile);
+  const weeklyTrend = calculateWeeklyTrend(weather);
+  const weekPattern = calculateWeekPattern(weather);
+  const week = buildWeekForecast(weather, profile);
+  const bestDay = weekRanking.length > 0 ? weekRanking[0] : null;
+
+  // ۱۴. مقایسه پروفایل‌ها
+  const friendComparison = allProfiles
+    ? compareProfiles(allProfiles, weather, profile.id)
+    : null;
+
+  // ۱۵. تغییر پیش‌بینی
+  const forecastChange = detectForecastChange(weather.hourly, forecastSnapshot ?? null);
+
+  // ۱۶. آسمان شب
+  const nightSky = daylightInfo
+    ? computeNightSky(weather.hourly, now, daylightInfo.sunset)
+    : null;
+
+  // ۱۷. فشار هوا
+  const pressure = computePressure(weather.hourly, now);
+
+  // ۱۸. زمان حرکت
+  const departureSuggestion = calculateDepartureSuggestion(goldenWindow, profile, now);
+
+  // ۱۹. مدت پیشنهادی
+  const durationSuggestion = calculateDurationSuggestion(goldenWindow, profile.typicalOutingDuration);
+
+  // ۲۰. زمان آخرین به‌روزرسانی
   const minutesAgo = Math.round((now.getTime() - weather.fetchedAt.getTime()) / (60 * 1000));
   const isStale = minutesAgo > 30;
 
@@ -74,25 +148,24 @@ export function evaluate(input: EvaluateInput): DecisionOutput {
 
     goDecision,
 
-    // بخش ۲ — فعلاً null/خالی
-    wearAdvice: null,
-    gearAdvice: null,
-    nowcast: null,
-    temperatureShock: null,
-    activityScores: [],
-    carWash: null,
-    daylightInfo: null,
-    bestDay: null,
-    weekRanking: [],
-    friendComparison: null,
-    alerts: [],
-    forecastChange: null,
-    week: null,
-    weeklyTrend: '',
-    weekPattern: '',
-    departureSuggestion: null,
-    nightSky: null,
-    pressure: null,
+    wearAdvice,
+    gearAdvice,
+    nowcast,
+    temperatureShock,
+    activityScores,
+    carWash,
+    daylightInfo,
+    bestDay,
+    weekRanking,
+    friendComparison,
+    alerts,
+    forecastChange,
+    week,
+    weeklyTrend,
+    weekPattern,
+    departureSuggestion,
+    nightSky,
+    pressure,
 
     lastUpdated: {
       at: weather.fetchedAt,
@@ -104,95 +177,34 @@ export function evaluate(input: EvaluateInput): DecisionOutput {
 
 // ----- buildCurrentConditions -----
 function buildCurrentConditions(weather: WeatherData, now: Date): CurrentConditions {
-  // پیدا کردن ساعت فعلی
   const currentHour = now.getHours();
-  const currentHourData = weather.hourly.find((h) => h.hour === currentHour);
+  let currentHourData = weather.hourly.find((h) => h.hour === currentHour);
 
   if (!currentHourData) {
-    // fallback: نزدیک‌ترین ساعت
-    const closest = weather.hourly.reduce((min, h) => {
+    currentHourData = weather.hourly.reduce((min, h) => {
       const diff = Math.abs(h.time.getTime() - now.getTime());
       const minDiff = Math.abs(min.time.getTime() - now.getTime());
       return diff < minDiff ? h : min;
     }, weather.hourly[0]);
-
-    return buildConditionsFromHour(closest);
   }
 
-  return buildConditionsFromHour(currentHourData);
-}
+  const h = currentHourData;
 
-function buildConditionsFromHour(h: import('../types').HourlyData): CurrentConditions {
-  // تفسیر دما
-  let tempInterpretation: string;
-  if (h.apparentTemperature < 0) tempInterpretation = 'یخبندان';
-  else if (h.apparentTemperature < 10) tempInterpretation = 'خیلی سرد';
-  else if (h.apparentTemperature < 16) tempInterpretation = 'سرد';
-  else if (h.apparentTemperature < 22) tempInterpretation = 'مطبوع';
-  else if (h.apparentTemperature < 28) tempInterpretation = 'گرم';
-  else if (h.apparentTemperature < 35) tempInterpretation = 'خیلی گرم';
-  else tempInterpretation = 'سوزان';
+  // تفسیرها
+  const temperatureInterpretation = interpretTemperature(h.temperature, h.apparentTemperature);
+  const humidityLabel = interpretHumidity(h.relativeHumidity);
+  const cloudLabel = interpretCloudCover(h.cloudCover);
+  const windGustLabel = interpretWindGust(h.windGusts);
+  const windDirInfo = interpretWindDirection(h.windDirection);
+  const uvInfo = interpretUV(h.uvIndex);
+  const weatherInfo = interpretWeatherCode(h.weatherCode);
 
-  // تفسیر رطوبت
-  let humidityLabel: string;
-  if (h.relativeHumidity < 30) humidityLabel = 'خشک';
-  else if (h.relativeHumidity < 50) humidityLabel = 'معمولی';
-  else if (h.relativeHumidity < 70) humidityLabel = 'مرطوب';
-  else humidityLabel = 'خیلی مرطوب';
-
-  // تفسیر ابر
-  let cloudLabel: string;
-  if (h.cloudCover < 20) cloudLabel = 'صاف';
-  else if (h.cloudCover < 50) cloudLabel = 'نیمه‌ابری';
-  else if (h.cloudCover < 80) cloudLabel = 'ابری';
-  else cloudLabel = 'کاملاً ابری';
-
-  // تفسیر وزش باد
-  let gustLabel: string;
-  if (h.windGusts < 15) gustLabel = 'ملایم';
-  else if (h.windGusts < 25) gustLabel = 'متوسط';
-  else if (h.windGusts < 40) gustLabel = 'شدید';
-  else gustLabel = 'طوفانی';
-
-  // جهت باد
-  let windDirLabel: string;
-  const dir = h.windDirection;
-  if (dir >= 337.5 || dir < 22.5) windDirLabel = 'شمال';
-  else if (dir < 67.5) windDirLabel = 'شمال‌شرق';
-  else if (dir < 112.5) windDirLabel = 'شرق';
-  else if (dir < 157.5) windDirLabel = 'جنوب‌شرق';
-  else if (dir < 202.5) windDirLabel = 'جنوب';
-  else if (dir < 247.5) windDirLabel = 'جنوب‌غرب';
-  else if (dir < 292.5) windDirLabel = 'غرب';
-  else windDirLabel = 'شمال‌غرب';
-
-  // تفسیر بارش
   let precipLabel: string;
   if (h.precipitationProbability < 10) precipLabel = 'بدون بارش';
   else if (h.precipitationProbability < 30) precipLabel = 'احتمال کم';
   else if (h.precipitationProbability < 60) precipLabel = 'احتمال متوسط';
   else precipLabel = 'احتمال زیاد';
 
-  // کد هوا
-  let weatherLabel: string;
-  const code = h.weatherCode;
-  if (code === 0) weatherLabel = 'صاف';
-  else if (code <= 3) weatherLabel = 'نیمه‌ابری';
-  else if (code <= 48) weatherLabel = 'مه‌آلود';
-  else if (code <= 67) weatherLabel = 'بارانی';
-  else if (code <= 77) weatherLabel = 'برفی';
-  else if (code <= 82) weatherLabel = 'رگبار';
-  else weatherLabel = 'رعد و برق';
-
-  // UV
-  let uvLabel: string;
-  if (h.uvIndex <= 2) uvLabel = 'کم';
-  else if (h.uvIndex <= 5) uvLabel = 'متوسط';
-  else if (h.uvIndex <= 7) uvLabel = 'بالا';
-  else if (h.uvIndex <= 10) uvLabel = 'خیلی بالا';
-  else uvLabel = 'خطرناک';
-
-  // دید
   let visibilityLabel: string;
   if (h.visibility == null) visibilityLabel = 'نامشخص';
   else if (h.visibility < 1000) visibilityLabel = 'خیلی کم';
@@ -200,14 +212,19 @@ function buildConditionsFromHour(h: import('../types').HourlyData): CurrentCondi
   else if (h.visibility < 10000) visibilityLabel = 'متوسط';
   else visibilityLabel = 'خوب';
 
-  // خلاصه
-  const summary = `${weatherLabel}، ${tempInterpretation} (${Math.round(h.apparentTemperature)}°)، ${precipLabel}`;
+  const aqi = weather.airQuality?.[0]?.europeanAqi ?? null;
+  const aqiInfo = aqi != null ? interpretAQI(aqi) : { label: 'نامشخص', advice: '' };
+
+  const summary = buildSummary(
+    'go', // فعلاً ساده
+    null
+  );
 
   return {
     time: h.time,
     temperature: h.temperature,
     apparentTemperature: h.apparentTemperature,
-    temperatureInterpretation: tempInterpretation,
+    temperatureInterpretation,
     humidity: h.relativeHumidity,
     humidityLabel,
     dewPoint: h.dewPoint,
@@ -215,20 +232,20 @@ function buildConditionsFromHour(h: import('../types').HourlyData): CurrentCondi
     cloudLabel,
     windSpeed: h.windSpeed,
     windGusts: h.windGusts,
-    windGustLabel: gustLabel,
+    windGustLabel,
     windDirection: h.windDirection,
-    windDirectionLabel: windDirLabel,
+    windDirectionLabel: windDirInfo.label,
     precipitationProbability: h.precipitationProbability,
     precipitation: h.precipitation,
     precipitationLabel: precipLabel,
     weatherCode: h.weatherCode,
-    weatherLabel,
+    weatherLabel: weatherInfo.label,
     uvIndex: h.uvIndex,
-    uvLabel,
+    uvLabel: uvInfo.label,
     visibility: h.visibility,
     visibilityLabel,
-    aqi: null,
-    aqiLabel: 'نامشخص',
+    aqi,
+    aqiLabel: aqiInfo.label,
     summary,
   };
 }

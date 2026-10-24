@@ -316,8 +316,26 @@ export interface CurrentConditions {
 }
 
 // ----- WeekForecast -----
+export interface WeekDayForecast {
+  date: Date;
+  label: string;
+  weatherCode: number;
+  tempMin: number;
+  tempMax: number;
+  apparentTempMin: number;
+  apparentTempMax: number;
+  precipitationProbabilityMax: number;
+  precipitationSum: number;
+  windSpeedMax: number;
+  windGustsMax: number;
+  uvIndexMax: number;
+  bestWindow: TimeWindow | null;
+  status: 'good' | 'caution' | 'bad';
+  reasons: string[];
+}
+
 export interface WeekForecast {
-  days: DayRanking[];
+  days: WeekDayForecast[];
 }
 
 // ----- DecisionOutput (خروجی نهایی evaluate) -----

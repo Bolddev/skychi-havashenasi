@@ -175,9 +175,11 @@ export const useStore = create<AppState>()(
         if (state.lastFetch && Date.now() - state.lastFetch < 15 * 60 * 1000 && state.weatherData) {
           // کش معتبر — فقط evaluate مجدد
           const profile = state.getActiveProfile();
+          const allProfiles = state.profiles;
           const decision = evaluate({
             weather: state.weatherData,
             profile,
+            allProfiles,
             now: new Date(),
           });
           set({ decision });
@@ -191,9 +193,11 @@ export const useStore = create<AppState>()(
           set({ weatherData, lastFetch: Date.now() });
 
           const profile = get().getActiveProfile();
+          const allProfiles = get().profiles;
           const decision = evaluate({
             weather: weatherData,
             profile,
+            allProfiles,
             now: new Date(),
           });
           set({ decision });
