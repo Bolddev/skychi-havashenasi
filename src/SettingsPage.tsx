@@ -2,6 +2,7 @@ import { useStore } from './store';
 import { Settings, MapPin, Bell, Edit, RotateCcw } from 'lucide-react';
 import { Onboarding } from './Onboarding';
 import { useState } from 'react';
+import type { Gear, Activity } from './types';
 
 export function SettingsPage() {
   const { getActiveProfile, setOnboardingComplete } = useStore();
@@ -10,17 +11,22 @@ export function SettingsPage() {
   const profile = getActiveProfile();
 
   if (editing) {
-    return (
-      <Onboarding
-        editProfileId={profile.id}
-        onComplete={() => setEditing(false)}
-      />
-    );
+    return <Onboarding editProfileId={profile.id} onComplete={() => setEditing(false)} />;
   }
 
   const handleReset = () => {
     localStorage.removeItem('skychi-storage');
     window.location.reload();
+  };
+
+  const gearLabels: Record<string, string> = {
+    umbrella: '☂️ چتر', raincoat: '🧥 بارانی', jacket: '🧥 کاپشن',
+    hat: '🎩 کلاه', gloves: '🧤 دستکش', sunscreen: '🧴 ضدآفتاب',
+  };
+
+  const activityLabels: Record<string, string> = {
+    park: '🌳 پارک', walking: '🚶 پیاده‌روی', picnic: '🧺 پیک‌نیک',
+    shopping: '🛍️ خرید', sports: '🏃 ورزش', photography: '📷 عکاسی',
   };
 
   return (
@@ -30,7 +36,6 @@ export function SettingsPage() {
         <p className="text-sm text-text-secondary">شخصی‌سازی تجربه شما</p>
       </div>
 
-      {/* Location */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <MapPin size={18} className="text-accent" />
@@ -45,7 +50,6 @@ export function SettingsPage() {
         </div>
       </div>
 
-      {/* Profile Settings */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Edit size={18} className="text-accent" />
@@ -54,30 +58,26 @@ export function SettingsPage() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-text-secondary">آستانه سرما:</span>
-            <span className="font-medium tabular-nums">{profile.thresholds.coldThreshold}°C</span>
+            <span className="font-medium tabular-nums">{profile.coldComfortThreshold}°C</span>
           </div>
           <div className="flex justify-between">
             <span className="text-text-secondary">آستانه گرما:</span>
-            <span className="font-medium tabular-nums">{profile.thresholds.heatThreshold}°C</span>
+            <span className="font-medium tabular-nums">{profile.heatThreshold}°C</span>
           </div>
           <div className="flex justify-between">
             <span className="text-text-secondary">آستانه باد:</span>
-            <span className="font-medium tabular-nums">{profile.thresholds.windThreshold} km/h</span>
+            <span className="font-medium tabular-nums">{profile.windAnnoyThreshold} km/h</span>
           </div>
           <div className="flex justify-between">
             <span className="text-text-secondary">نسیم آزاردهنده:</span>
-            <span className="font-medium tabular-nums">{profile.thresholds.breezeThreshold} km/h</span>
+            <span className="font-medium tabular-nums">{profile.breezeAnnoyThreshold} km/h</span>
           </div>
         </div>
-        <button
-          onClick={() => setEditing(true)}
-          className="mt-3 w-full btn-secondary text-sm"
-        >
+        <button onClick={() => setEditing(true)} className="mt-3 w-full btn-secondary text-sm">
           ویرایش آستانه‌ها
         </button>
       </div>
 
-      {/* Notifications */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Bell size={18} className="text-accent" />
@@ -85,61 +85,34 @@ export function SettingsPage() {
         </div>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-text-secondary">زمان اعلان:</span>
-            <span className="font-medium">
-              {profile.thresholds.notificationTime === 'morning' ? '🌅 صبح' :
-               profile.thresholds.notificationTime === 'noon' ? '☀️ ظهر' :
-               profile.thresholds.notificationTime === 'before' ? '🚪 قبل خروج' : '📱 همه'}
-            </span>
-          </div>
-          <div className="flex justify-between">
             <span className="text-text-secondary">قبل از خروج:</span>
-            <span className="font-medium">
-              {profile.thresholds.notificationBefore === '30' ? '۳۰ دقیقه' :
-               profile.thresholds.notificationBefore === '60' ? '۱ ساعت' : '۲ ساعت'}
-            </span>
+            <span className="font-medium">{profile.notifications.leadTime === 30 ? '۳۰ دقیقه' : profile.notifications.leadTime === 60 ? '۱ ساعت' : '۲ ساعت'}</span>
           </div>
         </div>
-        <p className="text-xs text-text-secondary mt-2">
-          * اعلان‌ها در نسخه وب فعلاً غیرفعال هستند. در نسخه اندروید فعال خواهند شد.
-        </p>
       </div>
 
-      {/* Equipment */}
       <div className="glass-card p-4">
         <h3 className="text-sm font-medium text-text-secondary mb-3">تجهیزات من</h3>
         <div className="flex flex-wrap gap-2">
-          {profile.thresholds.equipment.map((eq) => (
+          {profile.gear.map((eq: Gear) => (
             <span key={eq} className="text-xs bg-white/50 px-2 py-1 rounded-lg">
-              {eq === 'umbrella' ? '☂️ چتر' :
-               eq === 'raincoat' ? '🧥 بارانی' :
-               eq === 'jacket' ? '🧥 کاپشن' :
-               eq === 'hat' ? '🎩 کلاه' :
-               eq === 'gloves' ? '🧤 دستکش' :
-               eq === 'sunscreen' ? '🧴 ضدآفتاب' : eq}
+              {gearLabels[eq] || eq}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Activities */}
       <div className="glass-card p-4">
         <h3 className="text-sm font-medium text-text-secondary mb-3">فعالیت‌های من</h3>
         <div className="flex flex-wrap gap-2">
-          {profile.thresholds.activities.map((act) => (
+          {profile.activities.map((act: Activity) => (
             <span key={act} className="text-xs bg-white/50 px-2 py-1 rounded-lg">
-              {act === 'park' ? '🌳 پارک' :
-               act === 'walk' ? '🚶 پیاده‌روی' :
-               act === 'picnic' ? '🧺 پیک‌نیک' :
-               act === 'shopping' ? '🛍️ خرید' :
-               act === 'exercise' ? '🏃 ورزش' :
-               act === 'photography' ? '📷 عکاسی' : act}
+              {activityLabels[act] || act}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Reset */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <RotateCcw size={18} className="text-danger" />
@@ -149,30 +122,22 @@ export function SettingsPage() {
           <div className="space-y-2">
             <p className="text-sm text-danger">مطمئنی؟ تمام تنظیمات پاک می‌شوند.</p>
             <div className="flex gap-2">
-              <button onClick={handleReset} className="flex-1 py-2 bg-danger text-white rounded-xl text-sm font-medium">
-                بله، پاک کن
-              </button>
-              <button onClick={() => setShowReset(false)} className="flex-1 py-2 glass-card text-sm">
-                انصراف
-              </button>
+              <button onClick={handleReset} className="flex-1 py-2 bg-danger text-white rounded-xl text-sm font-medium">بله، پاک کن</button>
+              <button onClick={() => setShowReset(false)} className="flex-1 py-2 glass-card text-sm">انصراف</button>
             </div>
           </div>
         ) : (
-          <button
-            onClick={() => setShowReset(true)}
-            className="w-full py-2 border border-danger/30 text-danger rounded-xl text-sm"
-          >
+          <button onClick={() => setShowReset(true)} className="w-full py-2 border border-danger/30 text-danger rounded-xl text-sm">
             بازنشانی همه تنظیمات
           </button>
         )}
       </div>
 
-      {/* About */}
       <div className="glass-card p-4 text-center">
         <p className="text-lg font-semibold text-accent">اسکایچی</p>
         <p className="text-xs text-text-secondary mt-1">دستیار تصمیم هوای بعدازظهر</p>
         <p className="text-xs text-text-secondary mt-2">داده‌ها: Open-Meteo API</p>
-        <p className="text-xs text-text-secondary">نسخه ۱.۰ — وب</p>
+        <p className="text-xs text-text-secondary">نسخه ۲.۰ — وب</p>
       </div>
     </div>
   );
