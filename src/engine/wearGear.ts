@@ -108,11 +108,14 @@ export function generateGearAdvice(
   const items: { gear: Gear; reason: string }[] = [];
   const conditional: string[] = [];
 
-  // چتر
+  // چتر - در باد شدید (>= 25 km/h) چتر کار نمی‌کند
+  // قاعده: همیشه فرض بر این است که در باد شدید چتر غیرقابل استفاده است
   if (maxRain >= 40 && profile.gear.includes('umbrella')) {
-    if (maxGust >= 25 || profile.umbrellaBadInWind) {
+    if (maxGust >= 25) {
+      // باد شدید - چتر اصلاً کار نمی‌کند
       items.push({ gear: 'raincoat', reason: 'بارانی/کلاه ضدآب؛ چتر نبر (باد شدید)' });
     } else {
+      // باد ملایم - چتر قابل استفاده
       items.push({ gear: 'umbrella', reason: 'چتر ببر' });
     }
   }

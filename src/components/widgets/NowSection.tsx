@@ -24,8 +24,10 @@ export function NowSection() {
     <GlassCard level={2} className="mb-4">
       {/* سطر اول: ساعت */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <WeatherIcon code={current.weatherCode} size="lg" />
+        <div className="flex items-center gap-3">
+          <div className="glass-1 rounded-2xl p-3">
+            <WeatherIcon code={current.weatherCode} size="lg" />
+          </div>
           <div>
             <div className="text-sm text-text-secondary">الان — {formatTime(current.time)}</div>
             <div className="text-base font-medium">{current.weatherLabel}</div>

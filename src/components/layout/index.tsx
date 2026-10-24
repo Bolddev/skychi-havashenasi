@@ -1,46 +1,63 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useStore } from '../../store';
-import { Sun, Calendar, Users, Settings, MapPin, RefreshCw } from 'lucide-react';
+import { Sun, Calendar, Users, Settings, MapPin, RefreshCw, Share2 } from 'lucide-react';
+import { ExportModal } from '../modals/ExportModal';
 
 // ============================================================
 // Header
 // ============================================================
 export function Header() {
   const { decision, lastFetch } = useStore();
+  const [showExport, setShowExport] = useState(false);
 
   const minutesAgo = decision?.lastUpdated.minutesAgo ?? 0;
   const isStale = decision?.lastUpdated.isStale ?? false;
 
   return (
-    <header className="glass-3 sticky top-0 z-40 px-4 py-3">
-      <div className="max-w-lg mx-auto">
-        {/* خط اول */}
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🌤️</span>
-            <h1 className="text-xl font-bold text-text-primary">اسکای‌چی</h1>
+    <>
+      <header className="glass-3 sticky top-0 z-40 px-4 py-3">
+        <div className="max-w-lg mx-auto">
+          {/* خط اول */}
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🌤️</span>
+              <h1 className="text-xl font-bold text-text-primary">اسکای‌چی</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowExport(true)}
+                className="glass-2 p-2 rounded-full hover:bg-white/80 transition-all"
+                aria-label="اشتراک‌گذاری اطلاعات"
+                title="خروجی اطلاعات"
+              >
+                <Share2 size={18} className="text-accent" />
+              </button>
+              <div className="flex items-center gap-1 text-sm text-text-secondary">
+                <MapPin size={14} />
+                <span>قرچک</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-sm text-text-secondary">
-            <MapPin size={14} />
-            <span>قرچک</span>
-          </div>
-        </div>
 
-        {/* خط دوم */}
-        <div className="flex items-center gap-2 text-xs">
-          {isStale ? (
-            <span className="text-warning flex items-center gap-1">
-              <RefreshCw size={12} />
-              داده {minutesAgo} دقیقه پیش — برای به‌روزرسانی بکش
-            </span>
-          ) : (
-            <span className="text-text-tertiary">
-              🔄 آخرین به‌روزرسانی: {minutesAgo === 0 ? 'الان' : `${minutesAgo} دقیقه پیش`}
-            </span>
-          )}
+          {/* خط دوم */}
+          <div className="flex items-center gap-2 text-xs">
+            {isStale ? (
+              <span className="text-warning flex items-center gap-1">
+                <RefreshCw size={12} />
+                داده {minutesAgo} دقیقه پیش — برای به‌روزرسانی بکش
+              </span>
+            ) : (
+              <span className="text-text-tertiary">
+                🔄 آخرین به‌روزرسانی: {minutesAgo === 0 ? 'الان' : `${minutesAgo} دقیقه پیش`}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* مودال اشتراک‌گذاری */}
+      <ExportModal isOpen={showExport} onClose={() => setShowExport(false)} />
+    </>
   );
 }
 

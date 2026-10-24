@@ -292,10 +292,11 @@ export function calculateHourRisk(
     advice.push('کاپشن بردار');
   }
   if (breakdown.rain.score > 15 && hour.precipitationProbability >= 40) {
-    if (hour.windGusts < 25 && profile.gear.includes('umbrella')) {
+    // در باد شدید (>= 25 km/h) چتر کار نمی‌کند - همیشه بارانی/کلاه ضدآب توصیه شود
+    if (hour.windGusts >= 25) {
+      advice.push('بارانی/کلاه ضدآب؛ چتر نبر (باد شدید)');
+    } else if (profile.gear.includes('umbrella')) {
       advice.push('چتر ببر');
-    } else if (hour.windGusts >= 25) {
-      advice.push('بارانی/کلاه ضدآب؛ چتر نبر');
     }
   }
   if (breakdown.wind.score > 15) {

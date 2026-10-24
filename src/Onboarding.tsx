@@ -301,12 +301,10 @@ function Step4Equipment({ answers, update }: { answers: Partial<UserProfile>; up
         </div>
       </div>
 
-      <div>
-        <p className="text-sm text-text-secondary mb-2">چتر در باد آزارت داده؟</p>
-        <div className="grid grid-cols-2 gap-2">
-          <OptionButton selected={answers.umbrellaBadInWind === true} onClick={() => update({ umbrellaBadInWind: true })}>بله</OptionButton>
-          <OptionButton selected={answers.umbrellaBadInWind === false} onClick={() => update({ umbrellaBadInWind: false })}>خیر</OptionButton>
-        </div>
+      <div className="p-3 bg-info/10 border border-info/20 rounded-xl">
+        <p className="text-xs text-text-secondary">
+          💡 <strong>نکته:</strong> در باد شدید (بیش از ۲۵ km/h) چتر کار نمی‌کند. در این شرایط، برنامه به‌طور خودکار بارانی یا کلاه ضدآب را توصیه می‌کند.
+        </p>
       </div>
     </div>
   );
