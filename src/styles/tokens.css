@@ -1,0 +1,110 @@
+/* ============================================================
+   اسکای‌چی نسخه ۲.۰ — توکن‌های طراحی
+   ============================================================ */
+
+:root {
+  /* پس‌زمینه */
+  --bg-base: #FAFAFF;
+  --bg-pink: #FFE0F0;
+  --bg-blue: #D4E4FF;
+  --bg-purple: #E0D4FF;
+  --bg-cream: #FFF5E6;
+
+  /* سطوح شیشه‌ای */
+  --glass-1: rgba(255, 255, 255, 0.55);
+  --glass-2: rgba(255, 255, 255, 0.72);
+  --glass-3: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-highlight: rgba(255, 255, 255, 0.7);
+
+  /* متن */
+  --text-primary: #0F0F14;
+  --text-secondary: #5A5A68;
+  --text-tertiary: #9A9AA8;
+  --text-inverse: #FFFFFF;
+
+  /* لهجه اصلی */
+  --accent-primary: #8B5CF6;
+  --accent-hover: #7C3AED;
+  --accent-soft: #C4B5FD;
+  --accent-ghost: rgba(139, 92, 246, 0.08);
+
+  /* رنگ‌های وضعیت */
+  --success: #10B981;
+  --success-soft: #D1FAE5;
+  --success-text: #047857;
+  --warning: #F59E0B;
+  --warning-soft: #FEF3C7;
+  --warning-text: #B45309;
+  --danger: #F43F5E;
+  --danger-soft: #FFE4E6;
+  --danger-text: #BE123C;
+  --info: #3B82F6;
+  --info-soft: #DBEAFE;
+
+  /* فاصله‌گذاری */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* گوشه‌ها */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* سایه‌ها */
+  --shadow-sm: 0 2px 8px rgba(15, 15, 20, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 15, 20, 0.08);
+  --shadow-lg: 0 16px 48px rgba(15, 15, 20, 0.12);
+  --shadow-accent: 0 4px 12px rgba(139, 92, 246, 0.25);
+
+  /* بلور */
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 20px;
+  --blur-xl: 32px;
+
+  /* انیمیشن */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Breakpoints */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+}
+
+/* حالت تاریک (آماده‌سازی برای نسخه ۲.۱) */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="dark"] {
+    --bg-base: #0F0F14;
+    --glass-1: rgba(30, 30, 40, 0.55);
+    --glass-2: rgba(30, 30, 40, 0.72);
+    --glass-3: rgba(30, 30, 40, 0.85);
+    --text-primary: #F5F5FA;
+    --text-secondary: #A0A0B0;
+  }
+}
+
+/* کاهش انیمیشن */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
