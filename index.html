@@ -2,21 +2,48 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#FAFAFF" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- Primary Meta Tags -->
+    <title>اسکای‌چی | دستیار تصمیم هوای بعدازظهر</title>
+    <meta name="title" content="اسکای‌چی | دستیار تصمیم هوای بعدازظهر" />
+    <meta name="description" content="بگو امروز کِی و چی بپوشم، نه اینکه دما چنده. دستیار هوشمند هواشناسی برای ساکنان قرچک." />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#8B5CF6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>اسکایچی | دستیار تصمیم هوای بعدازظهر</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="اسکای‌چی" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Critical CSS (inline for performance) -->
     <style>
       html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-      body { background-color: #FAFAFF; font-family: 'Inter', system-ui, sans-serif; }
+      body { background-color: #FAFAFF; font-family: 'Vazirmatn', 'Inter', system-ui, sans-serif; }
+      #root { min-height: 100vh; min-height: 100dvh; }
+      /* Loading state */
+      .app-loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #FAFAFF; }
+      .app-loading-spinner { width: 40px; height: 40px; border: 3px solid #E0D4FF; border-top-color: #8B5CF6; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="app-loading">
+        <div class="app-loading-spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

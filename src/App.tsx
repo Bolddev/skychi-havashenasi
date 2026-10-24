@@ -7,6 +7,8 @@ import { WeekPage } from './screens/Week';
 import { ProfilesPage } from './ProfilesPage';
 import { SettingsPage } from './SettingsPage';
 import { useState } from 'react';
+import { useInstallPrompt } from './pwa/installPrompt';
+import { GlassCard, Button } from './components/ui';
 
 function AppContent() {
   const { currentPage } = useStore();
@@ -28,6 +30,7 @@ function AppContent() {
 export default function App() {
   const { onboardingComplete } = useStore();
   const [showWelcome, setShowWelcome] = useState(true);
+  const { isInstallable, isInstalled, promptInstall, dismissInstall, shouldShowBanner } = useInstallPrompt();
 
   if (!onboardingComplete) {
     if (showWelcome) {
@@ -39,6 +42,20 @@ export default function App() {
   return (
     <AppShell>
       <AppContent />
+      {/* بنر نصب PWA */}
+      {shouldShowBanner() && (
+        <div className="fixed bottom-24 left-4 right-4 z-50 max-w-lg mx-auto">
+          <GlassCard level={3} className="flex items-center gap-3 p-4">
+            <span className="text-2xl">📱</span>
+            <div className="flex-1">
+              <p className="text-sm font-medium">اسکای‌چی را نصب کن</p>
+              <p className="text-xs text-text-secondary">دسترسی سریع‌تر، آفلاین</p>
+            </div>
+            <Button size="sm" onClick={promptInstall}>نصب</Button>
+            <button onClick={dismissInstall} className="text-text-tertiary hover:text-text-secondary p-1">×</button>
+          </GlassCard>
+        </div>
+      )}
     </AppShell>
   );
 }

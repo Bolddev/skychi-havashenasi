@@ -1,0 +1,242 @@
+{
+  "version": "2.0.0",
+  "description": "Test fixtures for SkyChi decision engine - for Android port testing",
+  "fixtures": [
+    {
+      "id": "sunny-day",
+      "name": "روز آفتابی معمولی",
+      "input": {
+        "profile": {
+          "coldComfortThreshold": 18,
+          "heatThreshold": 26,
+          "windAnnoyThreshold": 21,
+          "transport": "walking",
+          "dayNightPreference": "day"
+        },
+        "weather": {
+          "temperature": 25,
+          "apparentTemperature": 23,
+          "precipitationProbability": 3,
+          "windGusts": 18,
+          "uvIndex": 5,
+          "cloudCover": 65,
+          "weatherCode": 2
+        },
+        "now": "2025-01-20T16:00:00+03:30"
+      },
+      "expected": {
+        "goldenWindow": { "start": "16:00", "end": "18:00" },
+        "goDecision": "go-until",
+        "nowcast": "dry-next-2h",
+        "temperatureShock": null,
+        "alerts": []
+      }
+    },
+    {
+      "id": "afternoon-rain",
+      "name": "باران بعدازظهر",
+      "input": {
+        "profile": {
+          "coldComfortThreshold": 18,
+          "heatThreshold": 26,
+          "windAnnoyThreshold": 21,
+          "transport": "walking",
+          "gear": ["umbrella"]
+        },
+        "weather": {
+          "temperature": 22,
+          "apparentTemperature": 20,
+          "precipitationProbability": 70,
+          "windGusts": 15,
+          "uvIndex": 0,
+          "cloudCover": 90,
+          "weatherCode": 63
+        },
+        "now": "2025-01-20T16:00:00+03:30"
+      },
+      "expected": {
+        "goldenWindow": { "start": "16:00", "end": "17:30" },
+        "goDecision": "go-until",
+        "gearAdvice": ["چتر ببر"],
+        "nowcast": "rain-starting-soon"
+      }
+    },
+    {
+      "id": "temperature-shock",
+      "name": "شوک دمایی",
+      "input": {
+        "profile": {
+          "coldComfortThreshold": 18,
+          "transport": "walking"
+        },
+        "weather": {
+          "today": { "apparentTemperature": 18 },
+          "yesterday": { "apparentTemperature": 26 }
+        },
+        "now": "2025-01-20T18:00:00+03:30"
+      },
+      "expected": {
+        "temperatureShock": {
+          "magnitude": 8,
+          "direction": "colder",
+          "severity": "high"
+        },
+        "wearAdvice": "حتماً لایه گرم"
+      }
+    },
+    {
+      "id": "strong-wind",
+      "name": "باد شدید",
+      "input": {
+        "profile": {
+          "windAnnoyThreshold": 21,
+          "gear": ["umbrella", "raincoat"]
+        },
+        "weather": {
+          "temperature": 20,
+          "precipitationProbability": 60,
+          "windGusts": 55
+        },
+        "now": "2025-01-20T16:00:00+03:30"
+      },
+      "expected": {
+        "alerts": [{ "type": "wind", "severity": "warning" }],
+        "gearAdvice": "بارانی/کلاه ضدآب؛ چتر نبر",
+        "goDecision": "go-covered"
+      }
+    },
+    {
+      "id": "all-red",
+      "name": "همه قرمز",
+      "input": {
+        "profile": {
+          "coldComfortThreshold": 18,
+          "windAnnoyThreshold": 21
+        },
+        "weather": {
+          "temperature": 5,
+          "apparentTemperature": 2,
+          "precipitationProbability": 90,
+          "windGusts": 60
+        },
+        "now": "2025-01-20T16:00:00+03:30"
+      },
+      "expected": {
+        "goldenWindow": null,
+        "goDecision": "stay-indoor",
+        "activityScores": "all-bad"
+      }
+    },
+    {
+      "id": "all-green",
+      "name": "همه سبز",
+      "input": {
+        "profile": {
+          "coldComfortThreshold": 18,
+          "heatThreshold": 26,
+          "windAnnoyThreshold": 21
+        },
+        "weather": {
+          "temperature": 22,
+          "apparentTemperature": 22,
+          "precipitationProbability": 0,
+          "windGusts": 10,
+          "uvIndex": 4,
+          "cloudCover": 20
+        },
+        "now": "2025-01-20T16:00:00+03:30"
+      },
+      "expected": {
+        "goldenWindow": { "start": "16:00", "end": "22:00" },
+        "goDecision": "go",
+        "activityScores": "all-good"
+      }
+    },
+    {
+      "id": "ice-risk",
+      "name": "خطر یخ‌زدگی",
+      "input": {
+        "profile": {
+          "coldComfortThreshold": 18
+        },
+        "weather": {
+          "temperature": 1,
+          "apparentTemperature": -2,
+          "precipitationProbability": 30,
+          "precipitation": 0.5
+        },
+        "now": "2025-01-20T16:00:00+03:30"
+      },
+      "expected": {
+        "alerts": [{ "type": "ice", "severity": "warning" }],
+        "goDecision": "stay-indoor"
+      }
+    },
+    {
+      "id": "no-data",
+      "name": "داده ناقص",
+      "input": {
+        "profile": {
+          "coldComfortThreshold": 18
+        },
+        "weather": {
+          "minutely15": null,
+          "airQuality": null,
+          "yesterday": null
+        },
+        "now": "2025-01-20T16:00:00+03:30"
+      },
+      "expected": {
+        "nowcast": "no-data",
+        "temperatureShock": null,
+        "airRisk": 0
+      }
+    },
+    {
+      "id": "friend-comparison",
+      "name": "مقایسه دوستان",
+      "input": {
+        "profiles": [
+          { "id": "me", "coldComfortThreshold": 18, "transport": "walking" },
+          { "id": "friends", "coldComfortThreshold": 10, "transport": "car" }
+        ],
+        "weather": {
+          "temperature": 15,
+          "apparentTemperature": 14,
+          "precipitationProbability": 10,
+          "windGusts": 15
+        }
+      },
+      "expected": {
+        "friendComparison": {
+          "activeProfileWindow": "16:00-18:30",
+          "friendProfileWindow": "16:00-20:00",
+          "overlapWindow": "16:00-18:30"
+        }
+      }
+    },
+    {
+      "id": "forecast-change",
+      "name": "تغییر پیش‌بینی",
+      "input": {
+        "snapshot": {
+          "hour": 20,
+          "precipitationProbability": 10
+        },
+        "current": {
+          "hour": 20,
+          "precipitationProbability": 50
+        }
+      },
+      "expected": {
+        "forecastChange": {
+          "type": "rain",
+          "hour": 20,
+          "from": 10,
+          "to": 50,
+          "message": "بارش ۲۰:۰۰ از ۱۰٪ به ۵۰٪ افزایش یافت"
+        }
+      }
+    }
+  ]
+}
