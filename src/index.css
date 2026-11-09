@@ -1,0 +1,212 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+
+@theme {
+  --color-glass: rgba(255, 255, 255, 0.6);
+  --color-glass-strong: rgba(255, 255, 255, 0.85);
+  --color-accent: #8B5CF6;
+  --color-accent-light: #C4B5FD;
+  --color-danger: #F43F5E;
+  --color-warning: #F59E0B;
+  --color-success: #10B981;
+  --color-text-primary: #0F0F14;
+  --color-text-secondary: #5A5A68;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Vazirmatn', 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* پس‌زمینه اپ با گرادیان شعاعی */
+.bg-app {
+  background:
+    radial-gradient(at 20% 0%, var(--bg-pink) 0%, transparent 50%),
+    radial-gradient(at 80% 30%, var(--bg-blue) 0%, transparent 50%),
+    radial-gradient(at 50% 100%, var(--bg-purple) 0%, transparent 50%),
+    var(--bg-base);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* سطوح شیشه‌ای */
+.glass-1 {
+  background: var(--glass-1);
+  backdrop-filter: blur(var(--blur-md)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    var(--shadow-md);
+}
+
+.glass-2 {
+  background: var(--glass-2);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    var(--shadow-md);
+}
+
+.glass-3 {
+  background: var(--glass-3);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    var(--shadow-lg);
+}
+
+/* کلاس‌های قدیمی برای سازگاری */
+.glass { @extend .glass-1; }
+.glass-strong { @extend .glass-3; }
+.glass-card { @extend .glass-2; }
+.glass-nav { @extend .glass-3; }
+
+/* اعداد با tabular-nums */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* رنگ‌های وضعیت */
+.risk-green { background: linear-gradient(135deg, var(--success), #34D399); }
+.risk-yellow { background: linear-gradient(135deg, var(--warning), #FBBF24); }
+.risk-red { background: linear-gradient(135deg, var(--danger), #FB7185); }
+
+/* دکمه‌ها */
+.btn-primary {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-weight: 500;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), var(--shadow-accent);
+  transition: all var(--duration-fast) var(--ease-out);
+  min-height: 44px;
+  min-width: 44px;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--glass-1);
+  backdrop-filter: blur(var(--blur-md));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all var(--duration-fast) var(--ease-out);
+  min-height: 44px;
+  min-width: 44px;
+}
+.btn-secondary:hover {
+  background: var(--glass-2);
+}
+
+/* انیمیشن‌ها */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeSlideUp var(--duration-slow) var(--ease-out) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-slow) var(--ease-out) forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, var(--glass-1) 0%, var(--glass-2) 50%, var(--glass-1) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* اسکرول‌بار */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 2px;
+}
+
+/* Focus ring برای دسترس‌پذیری */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* RTL adjustments */
+[dir="rtl"] .space-x-2 > :not(:last-child) {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* موبایل: بلور کاهش‌یافته */
+@media (max-width: 768px) {
+  .glass-1, .glass-2, .glass-3 {
+    backdrop-filter: blur(var(--blur-sm)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--blur-sm)) saturate(160%);
+  }
+}
